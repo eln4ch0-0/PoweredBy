@@ -12,4 +12,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CompraResponseDTO {
+    private Long id;
+    private Long usuarioId;
+    private Long juegoId;
+    private String tituloJuego;
+    private BigDecimal precioPagado;
+    private LocalDateTime fechaCompra;
+    private EstadoCompra estado;
 }
