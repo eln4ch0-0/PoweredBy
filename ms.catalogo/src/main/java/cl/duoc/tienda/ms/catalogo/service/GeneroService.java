@@ -15,4 +15,22 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class GeneroService {
+
+    private final GeneroRepository repo;
+
+    public List<GeneroDTO> listar() {
+        return repo.findAll().stream().map(this::toDTO).toList();
+    }
+
+    public GeneroDTO obtener(Long id) {
+        return toDTO(buscar(id));
+    }
+
+    public GeneroDTO crear(GeneroDTO dto) {
+        if (repo.existsByNombre(dto.getNombre()))
+            throw new RecursoDuplicadoException("Ya existe un género con nombre: " + dto.getNombre());
+        Genero g = new Genero(null, dto.getNombre(), dto.getDescripcion());
+        log.info("Creando género: {}", dto.getNombre());
+        return toDTO(repo.save(g));
+    }
 }
