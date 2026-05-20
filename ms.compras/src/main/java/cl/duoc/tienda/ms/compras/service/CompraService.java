@@ -66,4 +66,23 @@ public class CompraService {
 
         return toResponse(guardada);
     }
+
+    public CompraResponseDTO obtener(Long id) {
+        Compra c = compraRepo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Compra con id " + id + " no existe"));
+        return toResponse(c);
+    }
+
+    public List<CompraResponseDTO> historialUsuario(Long usuarioId) {
+        return compraRepo.findByUsuarioId(usuarioId).stream().map(this::toResponse).toList();
+    }
+
+    public List<CompraResponseDTO> listar() {
+        return compraRepo.findAll().stream().map(this::toResponse).toList();
+    }
+
+    private CompraResponseDTO toResponse(Compra c) {
+        return new CompraResponseDTO(c.getId(), c.getUsuarioId(), c.getJuegoId(),
+                c.getTituloJuego(), c.getPrecioPagado(), c.getFechaCompra(), c.getEstado());
+    }
 }
