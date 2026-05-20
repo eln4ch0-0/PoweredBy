@@ -11,4 +11,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Desarrollador {
+
+  @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false, length = 100)
+    private String nombre;
+
+    @Column(length = 100)
+    private String pais;
+
+    @Column(name = "sitio_web", length = 200)
+    private String sitioWeb;
 }
