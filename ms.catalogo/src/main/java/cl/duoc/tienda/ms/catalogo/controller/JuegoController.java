@@ -37,4 +37,20 @@ public class JuegoController {
     public ResponseEntity<JuegoResponseDTO> crear(@Valid @RequestBody JuegoRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(dto));
     }
+  
+    @PutMapping("/{id}")
+    public ResponseEntity<JuegoResponseDTO> actualizar(@PathVariable Long id, @Valid @RequestBody JuegoRequestDTO dto) {
+        return ResponseEntity.ok(service.actualizar(id, dto));
+    }
+
+    @PutMapping("/{id}/disponibilidad")
+    public ResponseEntity<JuegoResponseDTO> cambiarDisponibilidad(@PathVariable Long id, @RequestParam boolean disponible) {
+        return ResponseEntity.ok(service.cambiarDisponibilidad(id, disponible));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        service.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
 }
