@@ -33,4 +33,17 @@ public class Juego {
 
     @Column(nullable = false)
     private Boolean disponible;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "genero_id", nullable = false)
+    private Genero genero;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "desarrollador_id", nullable = false)
+    private Desarrollador desarrollador;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.disponible == null) this.disponible = true;
+    }
 }
