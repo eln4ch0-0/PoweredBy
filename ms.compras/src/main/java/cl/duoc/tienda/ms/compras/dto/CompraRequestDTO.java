@@ -1,0 +1,10 @@
+package cl.duoc.tienda.ms.compras.dto;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.Data;
+
+@Data
+public class CompraRequestDTO {
+
+}
