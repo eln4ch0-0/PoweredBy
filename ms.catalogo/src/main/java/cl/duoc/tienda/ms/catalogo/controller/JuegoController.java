@@ -16,4 +16,25 @@ import java.util.List;
 @RequestMapping("/api/juegos")
 @RequiredArgsConstructor
 public class JuegoController {
+  
+    private final JuegoService service;
+
+    @GetMapping
+    public ResponseEntity<List<JuegoResponseDTO>> listar(
+            @RequestParam(required = false) Long genero,
+            @RequestParam(required = false) BigDecimal precioMax) {
+        if (genero != null) return ResponseEntity.ok(service.buscarPorGenero(genero));
+        if (precioMax != null) return ResponseEntity.ok(service.buscarHastaPrecio(precioMax));
+        return ResponseEntity.ok(service.listar());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<JuegoResponseDTO> obtener(@PathVariable Long id) {
+        return ResponseEntity.ok(service.obtener(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<JuegoResponseDTO> crear(@Valid @RequestBody JuegoRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(dto));
+    }
 }
