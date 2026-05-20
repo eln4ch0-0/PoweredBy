@@ -15,4 +15,22 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class DesarrolladorService {
+
+  private final DesarrolladorRepository repo;
+
+    public List<DesarrolladorDTO> listar() {
+        return repo.findAll().stream().map(this::toDTO).toList();
+    }
+
+    public DesarrolladorDTO obtener(Long id) {
+        return toDTO(buscar(id));
+    }
+
+    public DesarrolladorDTO crear(DesarrolladorDTO dto) {
+        if (repo.existsByNombre(dto.getNombre()))
+            throw new RecursoDuplicadoException("Ya existe un desarrollador con nombre: " + dto.getNombre());
+        Desarrollador d = new Desarrollador(null, dto.getNombre(), dto.getPais(), dto.getSitioWeb());
+        log.info("Creando desarrollador: {}", dto.getNombre());
+        return toDTO(repo.save(d));
+    }
 }
