@@ -43,4 +43,20 @@ public class DesarrolladorService {
         d.setSitioWeb(dto.getSitioWeb());
         return toDTO(repo.save(d));
     }
+
+    public void eliminar(Long id) {
+        if (!repo.existsById(id))
+            throw new RecursoNoEncontradoException("Desarrollador con id " + id + " no existe");
+        repo.deleteById(id);
+        log.warn("Desarrollador con id={} eliminado", id);
+    }
+
+    public Desarrollador buscar(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Desarrollador con id " + id + " no existe"));
+    }
+
+    private DesarrolladorDTO toDTO(Desarrollador d) {
+        return new DesarrolladorDTO(d.getId(), d.getNombre(), d.getPais(), d.getSitioWeb());
+    }
 }
