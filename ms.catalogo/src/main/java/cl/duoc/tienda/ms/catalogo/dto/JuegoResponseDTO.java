@@ -11,4 +11,12 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JuegoResponseDTO {
+    private Long id;
+    private String titulo;
+    private String descripcion;
+    private BigDecimal precio;
+    private LocalDate fechaLanzamiento;
+    private Boolean disponible;
+    private GeneroDTO genero;            
+    private DesarrolladorDTO desarrollador;
 }
