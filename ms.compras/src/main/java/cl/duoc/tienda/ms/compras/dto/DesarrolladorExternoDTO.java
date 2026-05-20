@@ -8,4 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DesarrolladorExternoDTO {
+    private Long id;
+    private String nombre;
 }
