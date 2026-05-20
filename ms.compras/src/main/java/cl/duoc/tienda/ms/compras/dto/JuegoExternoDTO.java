@@ -10,4 +10,10 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JuegoExternoDTO {
+    private Long id;
+    private String titulo;
+    private BigDecimal precio;
+    private Boolean disponible;
+    private GeneroExternoDTO genero;
+    private DesarrolladorExternoDTO desarrollador;
 }
