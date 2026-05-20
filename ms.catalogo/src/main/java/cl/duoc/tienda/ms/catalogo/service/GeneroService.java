@@ -49,4 +49,13 @@ public class GeneroService {
         repo.deleteById(id);
         log.warn("Género con id={} eliminado", id);
     }
+
+    public Genero buscar(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Género con id " + id + " no existe"));
+    }
+
+    private GeneroDTO toDTO(Genero g) {
+        return new GeneroDTO(g.getId(), g.getNombre(), g.getDescripcion());
+    }
 }
