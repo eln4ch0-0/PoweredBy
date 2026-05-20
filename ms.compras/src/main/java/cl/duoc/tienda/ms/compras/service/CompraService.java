@@ -26,4 +26,44 @@ public class CompraService {
     private final JuegoEnBibliotecaRepository bibliotecaRepo;
     private final UsuarioClient usuarioClient;
     private final CatalogoClient catalogoClient;
+
+    @Transactional
+    public CompraResponseDTO realizarCompra(CompraRequestDTO dto) {
+        log.info("Iniciando compra: usuario={} juego={}", dto.getUsuarioId(), dto.getJuegoId());
+
+        JuegoExternoDTO juego = catalogoClient.obtenerJuego(dto.getJuegoId());
+        if (Boolean.FALSE.equals(juego.getDisponible()))
+            throw new CompraInvalidaException("El juego '" + juego.getTitulo() + "' no está disponible para compra");
+
+        if (bibliotecaRepo.existsByUsuarioIdAndJuegoId(dto.getUsuarioId(), dto.getJuegoId()))
+            throw new CompraInvalidaException("El usuario ya posee este juego en su biblioteca");
+
+        UsuarioExternoDTO usuario = usuarioClient.obtenerUsuario(dto.getUsuarioId());
+        if (Boolean.FALSE.equals(usuario.getActivo()))
+            throw new CompraInvalidaException("El usuario está inactivo");
+        if (usuario.getSaldoBilletera().compareTo(juego.getPrecio()) < 0)
+            throw new CompraInvalidaException("Saldo insuficiente. Saldo: " + usuario.getSaldoBilletera()
+                    + " | Precio: " + juego.getPrecio());
+
+        usuarioClient.descontarSaldo(dto.getUsuarioId(), juego.getPrecio());
+        log.info("Saldo descontado correctamente");
+
+        Compra compra = new Compra();
+        compra.setUsuarioId(dto.getUsuarioId());
+        compra.setJuegoId(dto.getJuegoId());
+        compra.setTituloJuego(juego.getTitulo());
+        compra.setPrecioPagado(juego.getPrecio());
+        Compra guardada = compraRepo.save(compra);
+
+        JuegoEnBiblioteca enBiblio = new JuegoEnBiblioteca();
+        enBiblio.setUsuarioId(dto.getUsuarioId());
+        enBiblio.setJuegoId(dto.getJuegoId());
+        enBiblio.setTituloJuego(juego.getTitulo());
+        bibliotecaRepo.save(enBiblio);
+
+        log.info("Compra completada id={} | Juego '{}' agregado a biblioteca del usuario {}",
+                guardada.getId(), juego.getTitulo(), dto.getUsuarioId());
+
+        return toResponse(guardada);
+    }
 }
