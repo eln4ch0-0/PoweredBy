@@ -35,4 +35,17 @@ public class GlobalExceptionHandler {
         body.put("campos", errores);
         return ResponseEntity.badRequest().body(body);
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGenerico(Exception e) {
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno: " + e.getMessage());
+    }
+
+    private ResponseEntity<Map<String, Object>> build(HttpStatus status, String mensaje) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", status.value());
+        body.put("error", mensaje);
+        return ResponseEntity.status(status).body(body);
+    }
 }
