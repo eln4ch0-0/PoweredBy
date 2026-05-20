@@ -84,4 +84,19 @@ public class JuegoService {
         log.info("Juego {} marcado como disponible={}", id, disponible);
         return toResponse(repo.save(j));
     }
+
+    private Juego buscar(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Juego con id " + id + " no existe"));
+    }
+
+    private JuegoResponseDTO toResponse(Juego j) {
+        return new JuegoResponseDTO(
+                j.getId(), j.getTitulo(), j.getDescripcion(), j.getPrecio(),
+                j.getFechaLanzamiento(), j.getDisponible(),
+                new GeneroDTO(j.getGenero().getId(), j.getGenero().getNombre(), j.getGenero().getDescripcion()),
+                new DesarrolladorDTO(j.getDesarrollador().getId(), j.getDesarrollador().getNombre(),
+                        j.getDesarrollador().getPais(), j.getDesarrollador().getSitioWeb())
+        );
+    }
 }
