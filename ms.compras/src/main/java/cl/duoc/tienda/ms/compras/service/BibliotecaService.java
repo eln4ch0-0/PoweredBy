@@ -28,4 +28,9 @@ public class BibliotecaService {
                         "El usuario " + usuarioId + " no posee el juego " + juegoId));
         return toDTO(j);
     }
+
+    private JuegoEnBibliotecaDTO toDTO(JuegoEnBiblioteca j) {
+        return new JuegoEnBibliotecaDTO(j.getId(), j.getUsuarioId(), j.getJuegoId(),
+                j.getTituloJuego(), j.getFechaAdquisicion());
+    }
 }
