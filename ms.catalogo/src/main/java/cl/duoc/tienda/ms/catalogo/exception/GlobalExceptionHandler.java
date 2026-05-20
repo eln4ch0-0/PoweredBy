@@ -22,4 +22,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleDuplicado(RecursoDuplicadoException e) {
         return build(HttpStatus.CONFLICT, e.getMessage());
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidaciones(MethodArgumentNotValidException e) {
+        Map<String, String> errores = new HashMap<>();
+        e.getBindingResult().getFieldErrors().forEach(err ->
+                errores.put(err.getField(), err.getDefaultMessage()));
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Validación fallida");
+        body.put("campos", errores);
+        return ResponseEntity.badRequest().body(body);
+    }
 }
