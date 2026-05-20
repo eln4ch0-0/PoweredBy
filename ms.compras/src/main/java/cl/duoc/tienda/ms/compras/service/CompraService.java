@@ -21,4 +21,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class CompraService {
+
+    private final CompraRepository compraRepo;
+    private final JuegoEnBibliotecaRepository bibliotecaRepo;
+    private final UsuarioClient usuarioClient;
+    private final CatalogoClient catalogoClient;
 }
