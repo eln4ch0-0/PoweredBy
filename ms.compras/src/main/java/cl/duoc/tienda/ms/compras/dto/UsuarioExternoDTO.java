@@ -10,4 +10,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UsuarioExternoDTO {
+    private Long id;
+    private String username;
+    private String email;
+    private BigDecimal saldoBilletera;
+    private Boolean activo;
 }
