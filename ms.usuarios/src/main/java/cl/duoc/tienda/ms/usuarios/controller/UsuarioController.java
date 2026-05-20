@@ -1,0 +1,62 @@
+package cl.duoc.tienda.ms.usuarios.controller;
+
+import cl.duoc.tienda.ms.usuarios.dto.RecargaSaldoDTO;
+import cl.duoc.tienda.ms.usuarios.dto.UsuarioRequestDTO;
+import cl.duoc.tienda.ms.usuarios.dto.UsuarioResponseDTO;
+import cl.duoc.tienda.ms.usuarios.service.UsuarioService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/usuarios")
+@RequiredArgsConstructor
+public class UsuarioController {
+
+    private final UsuarioService service;
+
+    @GetMapping
+    public ResponseEntity<List<UsuarioResponseDTO>> listar() {
+        return ResponseEntity.ok(service.listar());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> obtener(@PathVariable Long id) {
+        return ResponseEntity.ok(service.obtenerPorId(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<UsuarioResponseDTO> crear(@Valid @RequestBody UsuarioRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(dto));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> actualizar(@PathVariable Long id,
+                                                         @Valid @RequestBody UsuarioRequestDTO dto) {
+        return ResponseEntity.ok(service.actualizar(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        service.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/recargar-saldo")
+    public ResponseEntity<UsuarioResponseDTO> recargar(@PathVariable Long id,
+                                                       @Valid @RequestBody RecargaSaldoDTO dto) {
+        return ResponseEntity.ok(service.recargarSaldo(id, dto.getMonto()));
+    }
+
+    // Endpoint que va a consumir MS-Compras
+    @PutMapping("/{id}/descontar-saldo")
+    public ResponseEntity<UsuarioResponseDTO> descontar(@PathVariable Long id,
+                                                        @RequestBody BigDecimal monto) {
+        return ResponseEntity.ok(service.descontarSaldo(id, monto));
+    }
+}
