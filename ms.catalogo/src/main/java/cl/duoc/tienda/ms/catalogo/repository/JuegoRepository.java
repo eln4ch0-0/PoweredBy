@@ -9,4 +9,8 @@ import java.util.List;
 
 @Repository
 public interface JuegoRepository extends JpaRepository<Juego, Long> {
+    boolean existsByTitulo(String titulo);
+    List<Juego> findByGeneroId(Long generoId);
+    List<Juego> findByDesarrolladorId(Long desarrolladorId);
+    List<Juego> findByPrecioLessThanEqualAndDisponibleTrue(BigDecimal precioMax);
 }
