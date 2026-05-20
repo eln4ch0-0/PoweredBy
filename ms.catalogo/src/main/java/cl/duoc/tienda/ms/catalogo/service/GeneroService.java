@@ -33,4 +33,20 @@ public class GeneroService {
         log.info("Creando género: {}", dto.getNombre());
         return toDTO(repo.save(g));
     }
+
+    public GeneroDTO actualizar(Long id, GeneroDTO dto) {
+        Genero g = buscar(id);
+        if (!g.getNombre().equals(dto.getNombre()) && repo.existsByNombre(dto.getNombre()))
+            throw new RecursoDuplicadoException("Ya existe un género con nombre: " + dto.getNombre());
+        g.setNombre(dto.getNombre());
+        g.setDescripcion(dto.getDescripcion());
+        return toDTO(repo.save(g));
+    }
+
+    public void eliminar(Long id) {
+        if (!repo.existsById(id))
+            throw new RecursoNoEncontradoException("Género con id " + id + " no existe");
+        repo.deleteById(id);
+        log.warn("Género con id={} eliminado", id);
+    }
 }
