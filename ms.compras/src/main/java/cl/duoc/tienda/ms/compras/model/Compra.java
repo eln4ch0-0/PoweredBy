@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Compra {
 
-  @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -27,4 +27,20 @@ public class Compra {
 
     @Column(name = "titulo_juego", nullable = false, length = 150)
     private String tituloJuego;
+    
+    @Column(name = "precio_pagado", nullable = false, precision = 10, scale = 2)
+    private BigDecimal precioPagado;
+
+    @Column(name = "fecha_compra", nullable = false, updatable = false)
+    private LocalDateTime fechaCompra;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private EstadoCompra estado;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.fechaCompra == null) this.fechaCompra = LocalDateTime.now();
+        if (this.estado == null) this.estado = EstadoCompra.COMPLETADA;
+    }
 }
