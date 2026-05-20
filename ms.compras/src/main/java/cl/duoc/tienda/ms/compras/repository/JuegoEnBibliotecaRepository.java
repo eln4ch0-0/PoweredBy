@@ -9,4 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface JuegoEnBibliotecaRepository extends JpaRepository<JuegoEnBiblioteca, Long> {
+    List<JuegoEnBiblioteca> findByUsuarioId(Long usuarioId);
+    Optional<JuegoEnBiblioteca> findByUsuarioIdAndJuegoId(Long usuarioId, Long juegoId);
+    boolean existsByUsuarioIdAndJuegoId(Long usuarioId, Long juegoId);
 }
