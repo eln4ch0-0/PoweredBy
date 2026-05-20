@@ -10,4 +10,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JuegoEnBibliotecaDTO {
+    private Long id;
+    private Long usuarioId;
+    private Long juegoId;
+    private String tituloJuego;
+    private LocalDateTime fechaAdquisicion;
 }
