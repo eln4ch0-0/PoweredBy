@@ -14,4 +14,23 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Juego {
+
+  @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false, length = 150)
+    private String titulo;
+
+    @Column(columnDefinition = "TEXT")
+    private String descripcion;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal precio;
+
+    @Column(name = "fecha_lanzamiento")
+    private LocalDate fechaLanzamiento;
+
+    @Column(nullable = false)
+    private Boolean disponible;
 }
