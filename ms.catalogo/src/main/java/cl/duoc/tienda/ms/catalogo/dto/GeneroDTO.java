@@ -10,4 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GeneroDTO {
+      private Long id;
+
+    @NotBlank(message = "El nombre del género es obligatorio")
+    @Size(max = 50)
+    private String nombre;
+
+    @Size(max = 255)
+    private String descripcion;
 }
