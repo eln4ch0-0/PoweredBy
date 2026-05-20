@@ -33,4 +33,14 @@ public class DesarrolladorService {
         log.info("Creando desarrollador: {}", dto.getNombre());
         return toDTO(repo.save(d));
     }
+
+    public DesarrolladorDTO actualizar(Long id, DesarrolladorDTO dto) {
+        Desarrollador d = buscar(id);
+        if (!d.getNombre().equals(dto.getNombre()) && repo.existsByNombre(dto.getNombre()))
+            throw new RecursoDuplicadoException("Ya existe un desarrollador con nombre: " + dto.getNombre());
+        d.setNombre(dto.getNombre());
+        d.setPais(dto.getPais());
+        d.setSitioWeb(dto.getSitioWeb());
+        return toDTO(repo.save(d));
+    }
 }
