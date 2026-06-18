@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -44,6 +45,11 @@ public class GlobalExceptionHandler {
         body.put("error", "Validación fallida");
         body.put("campos", errores);
         return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoResource(NoResourceFoundException e) {
+        return build(HttpStatus.NOT_FOUND, "Recurso no encontrado: " + e.getResourcePath());
     }
 
     @ExceptionHandler(Exception.class)
