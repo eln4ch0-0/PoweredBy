@@ -1,0 +1,64 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ms-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: ms-usuarios
+          uri: lb://MS-USUARIOS
+          predicates:
+            - Path=/api/usuarios/**
+
+        - id: ms-catalogo-juegos
+          uri: lb://MS-CATALOGO
+          predicates:
+            - Path=/api/juegos/**
+
+        - id: ms-catalogo-generos
+          uri: lb://MS-CATALOGO
+          predicates:
+            - Path=/api/generos/**
+
+        - id: ms-catalogo-desarrolladores
+          uri: lb://MS-CATALOGO
+          predicates:
+            - Path=/api/desarrolladores/**
+
+        - id: ms-compras
+          uri: lb://MS-COMPRAS
+          predicates:
+            - Path=/api/compras/**
+
+        - id: ms-biblioteca
+          uri: lb://MS-COMPRAS
+          predicates:
+            - Path=/api/biblioteca/**
+
+        - id: ms-resenas
+          uri: lb://MS-RESENAS
+          predicates:
+            - Path=/api/resenas/**
+
+        - id: ms-wishlist
+          uri: lb://MS-WISHLIST
+          predicates:
+            - Path=/api/wishlist/**
+
+        - id: ms-promociones
+          uri: lb://MS-PROMOCIONES
+          predicates:
+            - Path=/api/promociones/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
