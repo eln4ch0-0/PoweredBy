@@ -9,6 +9,15 @@
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-brightgreen?logo=spring)
 ![MySQL](https://img.shields.io/badge/MySQL-8.x-blue?logo=mysql)
 ![Microservicios](https://img.shields.io/badge/Arquitectura-Microservicios-blueviolet)
+![Tests](https://img.shields.io/badge/Tests-74%20✓-success)
+![Railway](https://img.shields.io/badge/Deployed-Railway-purple)
+
+---
+
+## 🌐 Demo en línea
+
+- 🚀 **App desplegada**: https://poweredby-production.up.railway.app
+- 📚 **Swagger UI público**: https://poweredby-production.up.railway.app/swagger-ui/index.html
 
 ---
 
@@ -22,6 +31,10 @@
 - [Estructura del Repositorio](#-estructura-del-repositorio)
 - [Instalación y Ejecución](#️-instalación-y-ejecución)
 - [Microservicios y Endpoints](#-microservicios-y-endpoints)
+- [Documentación con Swagger/OpenAPI](#-documentación-con-swaggeropenapi)
+- [API Gateway y Service Discovery](#-api-gateway-y-service-discovery)
+- [Pruebas Unitarias](#-pruebas-unitarias)
+- [Despliegue](#-despliegue)
 - [Flujo End-to-End](#-flujo-end-to-end)
 - [Manejo de Errores](#-manejo-de-errores)
 - [Decisiones de Diseño](#-decisiones-de-diseño)
@@ -67,6 +80,11 @@ Esta diferencia conceptual impacta directamente en el modelo de datos: cada comp
 - ✅ Validaciones de entrada con Bean Validation
 - ✅ Manejo centralizado de excepciones con `@RestControllerAdvice`
 - ✅ Logs estructurados con SLF4J para trazabilidad
+- ✨ **Service Discovery** con Eureka Server
+- ✨ **API Gateway** centralizado con Spring Cloud Gateway
+- ✨ **74 tests unitarios** con JUnit 5 y Mockito
+- ✨ **Documentación Swagger/OpenAPI** en los 6 microservicios
+- ✨ **Despliegue en Railway** con acceso público
 
 ---
 
@@ -77,6 +95,8 @@ El sistema está compuesto por **6 microservicios independientes**, cada uno con
 ```mermaid
 flowchart TB
     Cliente[Cliente / Postman]
+    Gateway[API Gateway<br/>:8090]
+    Eureka[Eureka Server<br/>:8761]
 
     Usuarios[MS-Usuarios<br/>:8081]
     Catalogo[MS-Catalogo<br/>:8082]
@@ -84,13 +104,23 @@ flowchart TB
     Resenas[MS-Resenas<br/>:8084]
     Wishlist[MS-Wishlist<br/>:8085]
     Promociones[MS-Promociones<br/>:8086]
+    
+    Cliente --> Gateway
 
-    Cliente -.-> Usuarios
-    Cliente -.-> Catalogo
-    Cliente -.-> Compras
-    Cliente -.-> Resenas
-    Cliente -.-> Wishlist
-    Cliente -.-> Promociones
+    Gateway -.-> Usuarios
+    Gateway -.-> Catalogo
+    Gateway -.-> Compras
+    Gateway -.-> Resenas
+    Gateway -.-> Wishlist
+    Gateway -.-> Promociones
+    
+    Usuarios -.registra.-> Eureka
+    Catalogo -.registra.-> Eureka
+    Compras -.registra.-> Eureka
+    Resenas -.registra.-> Eureka
+    Wishlist -.registra.-> Eureka
+    Promociones -.registra.-> Eureka
+    Gateway -.registra.-> Eureka
 
     Compras -->|valida + descuenta saldo| Usuarios
     Compras -->|valida juego| Catalogo
@@ -106,12 +136,14 @@ Cada microservicio cumple el patrón **Controller → Service → Repository (CS
 
 | # | Microservicio | Puerto | Base de datos | Consume |
 |---|---|---|---|---|
-| 1 | `ms.usuarios` | 8081 | `ms_usuarios_db` | — |
-| 2 | `ms.catalogo` | 8082 | `ms_catalogo_db` | — |
-| 3 | `ms.compras` | 8083 | `ms_compras_db` | Usuarios, Catalogo |
-| 4 | `ms.resenas` | 8084 | `ms_resenas_db` | Compras |
-| 5 | `ms.wishlist` | 8085 | `ms_wishlist_db` | Catalogo, Compras |
-| 6 | `ms.promociones` | 8086 | `ms_promociones_db` | Catalogo |
+| 1 | `ms.eureka` | 8761 | — | — |
+| 2 | `ms.gateway` | 8090 | — | Todos (vía Eureka) |
+| 3 | `ms.usuarios` | 8081 | `ms_usuarios_db` | — |
+| 4 | `ms.catalogo` | 8082 | `ms_catalogo_db` | — |
+| 5 | `ms.compras` | 8083 | `ms_compras_db` | Usuarios, Catalogo |
+| 6 | `ms.resenas` | 8084 | `ms_resenas_db` | Compras |
+| 7 | `ms.wishlist` | 8085 | `ms_wishlist_db` | Catalogo, Compras |
+| 8 | `ms.promociones` | 8086 | `ms_promociones_db` | Catalogo |
 
 ---
 
@@ -119,8 +151,11 @@ Cada microservicio cumple el patrón **Controller → Service → Repository (CS
 
 | Tecnología | Versión | Uso |
 |---|---|---|
-| Java | 17 | Lenguaje de programación |
+| Java | 17 / 21  | Lenguaje de programación |
 | Spring Boot | 4.0.6 | Framework principal |
+| Spring Cloud | 2025.1.1 | Orquestación de microservicios |
+| Spring Cloud Netflix Eureka | — | Service Discovery |
+| Spring Cloud Gateway | — | API Gateway reactivo (Netty) |
 | Spring Data JPA | — | Persistencia con Hibernate |
 | Spring Validation | — | Validaciones declarativas (Bean Validation) |
 | Spring WebFlux (WebClient) | — | Cliente HTTP entre microservicios |
@@ -128,6 +163,10 @@ Cada microservicio cumple el patrón **Controller → Service → Repository (CS
 | Maven | 3.9+ | Gestión de dependencias |
 | Lombok | — | Reducción de boilerplate |
 | SLF4J + Logback | — | Logging estructurado |
+| **JUnit 5** | — | Framework de testing |
+| **Mockito** | 5.20 | Mocking para pruebas unitarias |
+| **SpringDoc OpenAPI** | 3.0.1 | Documentación Swagger UI |
+| **Railway** | — | Plataforma de despliegue remoto |
 
 ---
 
@@ -135,7 +174,7 @@ Cada microservicio cumple el patrón **Controller → Service → Repository (CS
 
 Antes de ejecutar el proyecto necesitas tener instalado:
 
-- **JDK 17** o superior
+- **JDK 17** o superior (probado también con JDK 21)
 - **MySQL 8.x** corriendo localmente en el puerto 3306
 - **Maven 3.9+** (opcional si usas el wrapper `mvnw` incluido)
 - **IntelliJ IDEA** o cualquier IDE compatible con Maven (opcional)
@@ -148,6 +187,8 @@ Antes de ejecutar el proyecto necesitas tener instalado:
 ```
 PoweredBy/
 │
+├── ms.eureka/           # Eureka Server - Service Discovery (puerto 8761)
+├── ms.gateway/          # API Gateway - Enrutamiento centralizado (puerto 8090)
 ├── ms.usuarios/          # Microservicio de Usuarios (puerto 8081)
 ├── ms.catalogo/          # Microservicio de Catálogo (puerto 8082)
 ├── ms.compras/           # Microservicio de Compras (puerto 8083)
@@ -173,8 +214,10 @@ ms.<nombre>/
 │   ├── model/            # Entidades JPA
 │   ├── dto/              # Objetos de transferencia
 │   ├── exception/        # Excepciones + GlobalExceptionHandler
-│   ├── config/           # (Solo si comunica con otros MS) WebClientConfig
+│   ├── config/           # # OpenApiConfig + (Si comunica) WebClientConfig
 │   └── client/           # (Solo si comunica con otros MS) clientes HTTP
+├── src/test/java/cl/duoc/tienda/ms/<nombre>/
+│   └── service/          # Tests unitarios con JUnit 5 + Mockito
 ├── src/main/resources/
 │   └── application.properties
 └── pom.xml
@@ -197,47 +240,56 @@ Asegúrate de que MySQL esté corriendo en `localhost:3306`. Las bases de datos 
 
 Si tus credenciales de MySQL son distintas a `root` / sin contraseña, ajusta los archivos `application.properties` de cada microservicio.
 
+> ⚠️ **Importante**: Si usas XAMPP, asegúrate de **detener Tomcat** ya que ocupa el puerto 8080, lo cual puede generar conflictos.
+
 ### 3. Ejecutar los microservicios
 
-**Orden recomendado:** primero los microservicios independientes (`ms.usuarios`, `ms.catalogo`), luego los dependientes (`ms.compras`, `ms.resenas`, `ms.wishlist`, `ms.promociones`).
+1. **MS-Eureka** (8761) — Siempre primero
+2. **MS-Usuarios → MS-Catalogo → MS-Compras → MS-Resenas → MS-Wishlist → MS-Promociones** (8081-8086)
+3. **MS-Gateway** (8090) — Siempre el último
 
-#### Opción A — Script automatizado (Windows)
+#### Opción A — Desde IntelliJ IDEA (recomendado)
 
-Ejecuta el script incluido en la raíz del proyecto:
+Abrir cada proyecto y ejecutar `Application.java` con el botón ▶️.
 
-```cmd
-iniciar-todos.bat
-```
-
-Esto abre 6 ventanas de cmd, una por cada microservicio.
+> 💡 **Tip**: Abrir `ms.eureka` y `ms.gateway` en **ventanas separadas** de IntelliJ para evitar conflictos de classpath.
 
 #### Opción B — Manual desde terminal
 
 ```bash
-# En 6 terminales distintas:
+# En 8 terminales distintas:
+cd ms.eureka && ./mvnw spring-boot:run
 cd ms.usuarios && ./mvnw spring-boot:run
 cd ms.catalogo && ./mvnw spring-boot:run
 cd ms.compras && ./mvnw spring-boot:run
 cd ms.resenas && ./mvnw spring-boot:run
 cd ms.wishlist && ./mvnw spring-boot:run
 cd ms.promociones && ./mvnw spring-boot:run
+cd ms.gateway && ./mvnw spring-boot:run
 ```
 
 En Windows usa `mvnw.cmd spring-boot:run`.
 
-#### Opción C — Desde IntelliJ IDEA
-
-Abrir cada proyecto y ejecutar `Application.java` con el botón ▶️.
-
 ### 4. Verificar que los 6 microservicios están funcionando
 
 ```bash
+# Eureka Dashboard
+http://localhost:8761
+
+# API Gateway
+http://localhost:8090
+
+# Cada microservicio directamente
 curl http://localhost:8081/api/usuarios
 curl http://localhost:8082/api/juegos
 curl http://localhost:8083/api/compras
 curl http://localhost:8084/api/resenas
 curl http://localhost:8085/api/wishlist/usuario/1
 curl http://localhost:8086/api/promociones
+
+# Vía Gateway
+curl http://localhost:8090/api/usuarios
+curl http://localhost:8090/api/juegos
 ```
 
 Cada uno debería responder con `[]` (lista vacía) o con datos, y código HTTP **200**.
@@ -337,6 +389,144 @@ Sistema de promociones y descuentos.
 
 ---
 
+## 📚 Documentación con Swagger/OpenAPI
+
+Cada microservicio cuenta con su propia documentación interactiva Swagger UI accesible en:
+
+```
+http://localhost:[PUERTO]/swagger-ui/index.html
+```
+
+### URLs locales
+
+| Microservicio | URL Swagger |
+|---|---|
+| MS-Usuarios | http://localhost:8081/swagger-ui/index.html |
+| MS-Catalogo | http://localhost:8082/swagger-ui/index.html |
+| MS-Compras | http://localhost:8083/swagger-ui/index.html |
+| MS-Resenas | http://localhost:8084/swagger-ui/index.html |
+| MS-Wishlist | http://localhost:8085/swagger-ui/index.html |
+| MS-Promociones | http://localhost:8086/swagger-ui/index.html |
+
+### URL pública (desplegado)
+
+🌐 https://poweredby-production.up.railway.app/swagger-ui/index.html
+
+Cada endpoint está documentado con:
+- Descripción funcional
+- Parámetros de entrada con ejemplos
+- Códigos de respuesta HTTP
+- Modelos de datos (DTOs)
+- Ejemplos de request/response en JSON
+
+---
+
+## 🌐 API Gateway y Service Discovery
+
+### Eureka Server
+
+El **Eureka Server** (`ms.eureka` en el puerto 8761) actúa como el directorio central donde cada microservicio se registra al arrancar. Esto permite:
+
+- Descubrimiento dinámico de servicios sin URLs hardcodeadas
+- Balanceo de carga automático
+- Tolerancia a fallos (el Gateway sabe si un MS está caído)
+
+**Dashboard de Eureka**: http://localhost:8761
+
+### API Gateway
+
+El **API Gateway** (`ms.gateway` en el puerto 8090) centraliza el acceso a todos los microservicios. En vez de que el cliente conozca las URLs de cada MS, todo se accede a través del Gateway:
+
+```
+http://localhost:8090/api/usuarios     → ms.usuarios
+http://localhost:8090/api/juegos       → ms.catalogo
+http://localhost:8090/api/compras      → ms.compras
+http://localhost:8090/api/resenas      → ms.resenas
+http://localhost:8090/api/wishlist     → ms.wishlist
+http://localhost:8090/api/promociones  → ms.promociones
+```
+
+Las rutas se definen en `ms.gateway/src/main/resources/application.yaml` usando notación `lb://NOMBRE-SERVICIO` (load balanced), que delega en Eureka la resolución de la dirección real.
+
+---
+
+## 🧪 Pruebas Unitarias
+
+El proyecto cuenta con **74 tests unitarios** distribuidos en los 6 microservicios, todos pasando satisfactoriamente.
+
+### Tests por microservicio
+
+| Microservicio | Tests | Archivo |
+|---|---|---|
+| ms.promociones | 15 | `PromocionServiceTest.java` |
+| ms.compras | 10 | `CompraServiceTest.java` |
+| ms.usuarios | 13 | `UsuarioServiceTest.java` |
+| ms.catalogo | 10 | `JuegoServiceTest.java` |
+| ms.resenas | 13 | `ResenaServiceTest.java` |
+| ms.wishlist | 13 | `WishlistServiceTest.java` |
+| **Total** | **74** | |
+
+### Tecnologías de testing
+
+- **JUnit 5** (Jupiter) — Framework principal
+- **Mockito 5.20** — Mocking de dependencias
+- **AssertJ** — Aserciones fluentes
+- **Patrón AAA / Given-When-Then** — Estructura clara y legible
+
+### Cobertura
+
+Los tests cubren:
+- ✅ Casos exitosos (happy path)
+- ✅ Validaciones de reglas de negocio
+- ✅ Lanzamiento de excepciones esperadas
+- ✅ Verificaciones de interacción con repositorios y clientes externos
+- ✅ Casos límite (saldo insuficiente, recursos inexistentes, duplicidad, etc.)
+
+### Ejecutar tests
+
+Desde IntelliJ:
+- Click derecho en la clase de test → **Run 'XxxServiceTest'**
+
+Desde terminal:
+```bash
+cd ms.[nombre]
+./mvnw test
+```
+
+Para ejecutar un test específico:
+```bash
+./mvnw test -Dtest=PromocionServiceTest
+```
+
+---
+
+## 🚀 Despliegue
+
+### Despliegue Remoto en Railway
+
+El proyecto se encuentra desplegado en [Railway](https://railway.app), una plataforma cloud que permite despliegues directos desde GitHub.
+
+**URLs públicas:**
+- 🚀 **App**: https://poweredby-production.up.railway.app
+- 📚 **Swagger UI**: https://poweredby-production.up.railway.app/swagger-ui/index.html
+
+### Configuración del despliegue
+
+- **Base de datos**: MySQL aprovisionada por Railway (persistente)
+- **Variables de entorno** configuradas:
+   - `SPRING_DATASOURCE_URL`
+   - `SPRING_DATASOURCE_USERNAME`
+   - `SPRING_DATASOURCE_PASSWORD`
+   - `SPRING_JPA_HIBERNATE_DDL_AUTO=create`
+   - `EUREKA_CLIENT_ENABLED=false` (Eureka desactivado en cloud)
+   - `SPRING_CLOUD_DISCOVERY_ENABLED=false`
+- **Puerto público**: Generado automáticamente por Railway con dominio HTTPS
+
+### Despliegue Local con IntelliJ
+
+Para ejecutar localmente todo el sistema, simplemente seguir la sección [Instalación y Ejecución](#️-instalación-y-ejecución).
+
+
 ## 🔄 Flujo End-to-End
 
 Ejemplo completo del caso de uso principal:
@@ -393,6 +583,8 @@ POST http://localhost:8086/api/promociones/aplicar
 # → Devuelve precioFinal: 17493
 ```
 
+> 💡 **Tip**: También puedes ejecutar el flujo completo a través del **API Gateway** cambiando `http://localhost:8081/...` por `http://localhost:8090/...` para demostrar la interoperabilidad.
+
 ---
 
 ## 🚨 Manejo de Errores
@@ -401,7 +593,7 @@ Todos los microservicios devuelven respuestas de error consistentes en formato J
 
 ```json
 {
-  "timestamp": "2026-05-19T18:42:30.123",
+  "timestamp": "2026-06-19T18:42:30.123",
   "status": 404,
   "error": "Usuario con id 999 no existe"
 }
@@ -457,21 +649,38 @@ Estas restricciones se validan a nivel de aplicación y a nivel de BD (última l
 - `422` (en MS-Promociones) cuando el request es válido sintácticamente pero el estado lo invalida (promoción expirada, sin usos, etc.)
 - `503` cuando un servicio externo no responde
 
-### 7. URLs de microservicios externalizadas
+### 7. Service Discovery con Eureka
 
-Las URLs están en `application.properties`, no hardcoded. Facilita despliegues en distintos ambientes y futuras integraciones con Service Discovery (Eureka, Consul).
+Las URLs de los microservicios ya no están en `application.properties` hardcoded — ahora se resuelven dinámicamente a través de Eureka usando el nombre del servicio (`lb://MS.USUARIOS`). Esto permite:
+- Escalar horizontalmente sin reconfigurar
+- Recuperación automática ante fallos
+- Despliegues blue/green sin downtime
 
-### 8. `@Transactional` en operaciones críticas
+### 8. API Gateway centralizado
+
+El Gateway actúa como punto único de entrada al sistema. Beneficios:
+- El cliente solo conoce una URL
+- Centraliza autenticación, logging y rate limiting (futuro)
+- Permite versionado de API sin afectar a clientes existentes
+
+### 9. `@Transactional` en operaciones críticas
 
 `CompraService.realizarCompra()` y `PromocionService.aplicar()` están marcados como `@Transactional` para garantizar atomicidad local. La consistencia distribuida (con servicios externos) requeriría el patrón **Saga**, fuera del alcance de esta entrega.
 
-### 9. Enum con `EnumType.STRING`
+### 10. Enum con `EnumType.STRING`
 
 `TipoDescuento` (PORCENTAJE / MONTO_FIJO) en MS-Promociones se persiste como String, no como ordinal. Si se reordena el enum, los datos existentes no se corrompen.
 
-### 10. Unificación de excepciones genéricas
+### 11. Tests con Mockito siguiendo AAA
 
-En microservicios con múltiples entidades (`ms.catalogo`) se usa `RecursoNoEncontradoException` genérica con mensaje descriptivo, en lugar de una excepción por entidad. Reduce duplicación sin perder información.
+Los tests aíslan completamente la lógica del servicio mockeando repositorios y clientes externos. Esto permite:
+- Ejecución rápida (no requiere BD ni red)
+- Tests reproducibles
+- Validación precisa de comportamiento (`verify()` para asegurar que se llamaron los métodos esperados)
+
+### 12. Documentación coherente con el código
+
+La documentación Swagger se genera automáticamente a partir de las anotaciones del código (`@Tag`, `@Operation`, `@ApiResponse`, `@Schema`). Esto garantiza que la documentación siempre esté sincronizada con el comportamiento real.
 
 ---
 
@@ -495,6 +704,12 @@ El repositorio incluye una colección de Postman lista para importar en `postman
 ### Variables de entorno
 
 La colección define variables `host_usuarios`, `host_catalogo`, etc. para cada microservicio. Si cambias un puerto, solo lo modificas en la variable y todos los requests se actualizan automáticamente.
+
+---
+
+## 📊 Gestión del proyecto
+
+- **Trello Board**: https://trello.com/b/lnB5FqJr/poweredby
 
 ---
 
